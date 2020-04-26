@@ -33,29 +33,29 @@ public class UserDaoTest {
 	
 	@Autowired
 	ApplicationContext context; //스프링 컨텍스트 (DI)
-	
+
 	@Autowired
 	UserDao dao;  //UserDao (DI)
-	
+
 	private User user1;
 	private User user2;
 	private User user3;
-	
+
 	@Before
 	public void setUp() throws SQLException {
 		this.dao = this.context.getBean("userDao", UserDao.class);
-		
+
 		this.user1 = new User("yuri", "유리", "rabbit");
 		this.user2 = new User("roy", "로이", "cat");
 		this.user3 = new User("riphi", "리피", "moonbird");
 		//각 테스트에 사용될 user 객체 세팅(목 데이터)
-			
+
 		this.dao.deleteAll();
 		//동등한 결과를 보장하기 위해 table 값을 모두 제거
 	}
-	
-	@Test 
-	public void andAndGet() throws SQLException {	
+
+	@Test
+	public void andAndGet() throws SQLException {
 		assertThat(dao.getCount(), is(0));
 		//빈 테이블 확인
 
@@ -63,12 +63,12 @@ public class UserDaoTest {
 		dao.add(user2);
 		assertThat(dao.getCount(), is(2));
 		//등록된 로우가 2(콩)개
-		
+
 		User userget1 = dao.get(user1.getId());
 		assertThat(userget1.getName(), is(user1.getName()));
 		assertThat(userget1.getPassword(), is(user1.getPassword()));
 		//검증
-		
+
 		User userget2 = dao.get(user2.getId());
 		assertThat(userget2.getName(), is(user2.getName()));
 		assertThat(userget2.getPassword(), is(user2.getPassword()));
@@ -79,22 +79,22 @@ public class UserDaoTest {
 	public void getUserFailure() throws SQLException {
 		//예외에 대한 테스트
 		assertThat(dao.getCount(), is(0));
-		
+
 		dao.get("unknown_id");
 	}
 
-	
+
 	@Test
 	public void count() throws SQLException {
 		//테이블 로우 수에 대한 테스트
 		assertThat(dao.getCount(), is(0));
-				
+
 		dao.add(user1);
 		assertThat(dao.getCount(), is(1));
-		
+
 		dao.add(user2);
 		assertThat(dao.getCount(), is(2));
-		
+
 		dao.add(user3);
 		assertThat(dao.getCount(), is(3));
 	}
