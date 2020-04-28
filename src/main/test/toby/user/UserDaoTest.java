@@ -16,21 +16,21 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import springbook.user.domain.User;
 /**
- * 
+ *
  * 일반적으로 테스트 케이스는 메이븐 프로젝트 빌드구조를 따라갈 경우
  * src/test/java 폴더 밑에 구성을 합니다.
  * 본 예제의 경우는 토비의 스프링을 공부하며 만들었기 때문에 따로 test폴더 아래 작성하지 않았습니다.
  *
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations="/applicationContext.xml")
+@ContextConfiguration(locations= "/applicationContext.xml")
 public class UserDaoTest {
 	/*
 	 * @ContextConfiguration 어노테이션을 이용하여 applicationContext.xml을 읽어온다.(초기화)
 	 * 스프링은 어플리케이션 컨텍스트를 초기화 할 때 자기자신도 빈으로 등록한다.
 	 * 어플리케이션 컨텍스트를 통해 등록된 빈들이 이 클래스에 주입된다(아래 코드)
 	 */
-	
+
 	@Autowired
 	ApplicationContext context; //스프링 컨텍스트 (DI)
 
