@@ -35,7 +35,7 @@ public class UserDaoTest {
 	ApplicationContext context; //스프링 컨텍스트 (DI)
 
 	@Autowired
-	UserDao dao;  //UserDao (DI)
+	private UserDao dao;  //UserDaoJdbc (DI)
 
 	private User user1;
 	private User user2;
@@ -43,7 +43,7 @@ public class UserDaoTest {
 
 	@Before
 	public void setUp() throws SQLException {
-		this.dao = this.context.getBean("userDao", UserDao.class);
+		this.dao = this.context.getBean("userDao", UserDaoJdbc.class);
 
 		this.user1 = new User("yuri", "유리", "rabbit");
 		this.user2 = new User("roy", "로이", "cat");
