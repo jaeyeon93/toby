@@ -1,34 +1,30 @@
-package user;
+package toby.dao;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
-import dao.UserDao;
-import domain.Level;
-import domain.User;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
-import org.springframework.jdbc.support.SQLExceptionTranslator;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import service.UserService;
+import toby.domain.Level;
+import toby.domain.User;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath:test-applicationContext.xml"})
+@ContextConfiguration(locations= "/test-applicationContext.xml")
 public class UserDaoTest {
-    @Autowired UserDao dao;
-    @Autowired DataSource dataSource;
+    @Autowired
+    UserDao dao;
+    @Autowired
+    DataSource dataSource;
 
     private User user1;
     private User user2;
@@ -57,7 +53,7 @@ public class UserDaoTest {
         checkSameUser(userget2, user2);
     }
 
-    @Test(expected=EmptyResultDataAccessException.class)
+    @Test(expected= EmptyResultDataAccessException.class)
     public void getUserFailure() throws SQLException {
         dao.deleteAll();
         assertThat(dao.getCount(), is(0));
@@ -124,6 +120,7 @@ public class UserDaoTest {
         dao.add(user1);
         dao.add(user1);
     }
+
 
     @Test
     public void update() {

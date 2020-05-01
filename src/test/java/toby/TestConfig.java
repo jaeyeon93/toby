@@ -1,4 +1,4 @@
-//package user;
+//package domain;
 //
 //import dao.UserDao;
 //import dao.UserDaoJdbc;

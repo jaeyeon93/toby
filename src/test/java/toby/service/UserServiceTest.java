@@ -1,31 +1,12 @@
-package user;
+package toby.service;
 
-import dao.UserDao;
-import domain.Level;
-import domain.User;
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.MailException;
-import org.springframework.mail.MailSender;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.transaction.PlatformTransactionManager;
-import service.UserService;
+import toby.dao.UserDao;
+import toby.domain.User;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
-import static service.UserService.MIN_LOGCOUNT_FOR_SILVER;
-import static service.UserService.MIN_RECCOMEND_FOR_GOLD;
-
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations= "/test-applicationContext.xml")
 public class UserServiceTest {
-    @Autowired
-    UserService userService;
+    @Autowired UserService userService;
     @Autowired
     UserDao userDao;
     @Autowired MailSender mailSender;
@@ -44,9 +25,8 @@ public class UserServiceTest {
         );
     }
 
-    @Test
-    @DirtiesContext
-    public void upgradeLevels() throws Exception {
+    @Test @DirtiesContext
+    public void upgradeLevels() {
         userDao.deleteAll();
         for(User user : users) userDao.add(user);
 
@@ -112,7 +92,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void upgradeAllOrNothing() throws Exception {
+    public void upgradeAllOrNothing() {
         UserService testUserService = new TestUserService(users.get(3).getId());
         testUserService.setUserDao(this.userDao);
         testUserService.setTransactionManager(this.transactionManager);
@@ -147,4 +127,7 @@ public class UserServiceTest {
 
     static class TestUserServiceException extends RuntimeException {
     }
+
+
+
 }
