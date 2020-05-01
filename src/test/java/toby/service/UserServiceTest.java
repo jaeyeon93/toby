@@ -1,7 +1,29 @@
 package toby.service;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailException;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.PlatformTransactionManager;
 import toby.dao.UserDao;
+import toby.domain.Level;
 import toby.domain.User;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static toby.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
+import static toby.service.UserService.MIN_RECCOMEND_FOR_GOLD;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations= "/test-applicationContext.xml")
@@ -9,8 +31,10 @@ public class UserServiceTest {
     @Autowired UserService userService;
     @Autowired
     UserDao userDao;
-    @Autowired MailSender mailSender;
-    @Autowired PlatformTransactionManager transactionManager;
+    @Autowired
+    MailSender mailSender;
+    @Autowired
+    PlatformTransactionManager transactionManager;
 
     List<User> users;	// test fixture
 
@@ -25,7 +49,8 @@ public class UserServiceTest {
         );
     }
 
-    @Test @DirtiesContext
+    @Test
+    @DirtiesContext
     public void upgradeLevels() {
         userDao.deleteAll();
         for(User user : users) userDao.add(user);
@@ -127,7 +152,5 @@ public class UserServiceTest {
 
     static class TestUserServiceException extends RuntimeException {
     }
-
-
 
 }
