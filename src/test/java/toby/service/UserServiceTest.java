@@ -57,19 +57,19 @@ public class UserServiceTest {
     @Test
     @DirtiesContext
     public void upgradeLevels() {
-        userDao.deleteAll();
-        for(User user : users) userDao.add(user);
+        UserServiceImpl userServiceImpl = new UserServiceImpl();
+        MockUserDao mockUserDao = new MockUserDao(this.users);
+        userServiceImpl.setUserDao(mockUserDao);
 
         MockMailSender mockMailSender = new MockMailSender();
-        userService.setMailSender(mockMailSender);
+        userServiceImpl.setMailSender(mockMailSender);
 
-        userService.upgradeLevels();
+        userServiceImpl.upgradeLevels();
 
-        checkLevelUpgraded(users.get(0), false);
-        checkLevelUpgraded(users.get(1), true);
-        checkLevelUpgraded(users.get(2), false);
-        checkLevelUpgraded(users.get(3), true);
-        checkLevelUpgraded(users.get(4), false);
+        List<User> updated = mockUserDao.getUpdated();
+        assertThat(updated.size(), is(2));
+        checkLevelUpgraded(updated.get(0), "joytouch", Level.SILVER);
+        checkLevelUpgraded(updated.get(1), "madnite1", Level.GOLD);
 
         List<String> request = mockMailSender.getRequests();
         assertThat(request.size(), is(2));
@@ -92,15 +92,9 @@ public class UserServiceTest {
         }
     }
 
-
-    private void checkLevelUpgraded(User user, boolean upgraded) {
-        User userUpdate = userDao.get(user.getId());
-        if (upgraded) {
-            assertThat(userUpdate.getLevel(), is(user.getLevel().nextLevel()));
-        }
-        else {
-            assertThat(userUpdate.getLevel(), is(user.getLevel()));
-        }
+    private void checkLevelUpgraded(User updated, String expecedId, Level expectedLevel) {
+        assertThat(updated.getId(), is(expecedId));
+        assertThat(updated.getLevel(), is(expectedLevel));
     }
 
     @Test
@@ -140,8 +134,48 @@ public class UserServiceTest {
         }
         catch(TestUserServiceException e) {
         }
+    }
 
-        checkLevelUpgraded(users.get(1), false);
+    static class MockUserDao implements UserDao {
+        private List<User> users;
+        private List<User> updated = new ArrayList<>();
+
+        private MockUserDao(List<User> users) {
+            this.users = users;
+        }
+
+        public List<User> getUsers() {
+            return users;
+        }
+
+        public List<User> getUpdated() {
+            return updated;
+        }
+
+        @Override
+        public void update(User user) {
+            // Mock오브젝트 제공
+            updated.add(user);
+        }
+
+        @Override
+        public List<User> getAll() {
+            // 스텁기능 제공
+            return this.users;
+        }
+
+
+        // 테스트에 사용 안되는 메서드들
+        @Override
+        public void add(User user) { throw new UnsupportedOperationException(); }
+        @Override
+        public User get(String id) { throw new UnsupportedOperationException(); }
+        @Override
+        public void deleteAll() { throw new UnsupportedOperationException(); }
+        @Override
+        public int getCount() { throw new UnsupportedOperationException(); }
+
+
     }
 
 
