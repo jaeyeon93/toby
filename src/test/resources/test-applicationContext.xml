@@ -14,10 +14,14 @@
         <property name="dataSource" ref="dataSource" />
     </bean>
 
-    <bean id="userService" class="toby.service.UserService">
+    <bean id="userServiceImpl" class="toby.service.UserServiceImpl">
         <property name="userDao" ref="userDao" />
-        <property name="transactionManager" ref="transactionManager" />
         <property name="mailSender" ref="mailSender" />
+    </bean>
+
+    <bean id="userService" class="toby.service.UserServiceTx">
+        <property name="transactionManager" ref="transactionManager" />
+        <property name="userService" ref="userServiceImpl" />
     </bean>
 
     <bean id="mailSender" class="toby.service.DummyMailSender" />

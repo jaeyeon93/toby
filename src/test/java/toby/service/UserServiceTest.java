@@ -22,17 +22,22 @@ import java.util.List;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static toby.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
-import static toby.service.UserService.MIN_RECCOMEND_FOR_GOLD;
+import static toby.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
+import static toby.service.UserServiceImpl.MIN_RECCOMEND_FOR_GOLD;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations= "/test-applicationContext.xml")
 public class UserServiceTest {
-    @Autowired UserService userService;
+
+    @Autowired
+    UserServiceImpl userService;
+
     @Autowired
     UserDao userDao;
+
     @Autowired
     MailSender mailSender;
+
     @Autowired
     PlatformTransactionManager transactionManager;
 
@@ -118,10 +123,13 @@ public class UserServiceTest {
 
     @Test
     public void upgradeAllOrNothing() {
-        UserService testUserService = new TestUserService(users.get(3).getId());
+        UserServiceImpl testUserService = new TestUserServiceImpl(users.get(3).getId());
         testUserService.setUserDao(this.userDao);
-        testUserService.setTransactionManager(this.transactionManager);
         testUserService.setMailSender(this.mailSender);
+
+        UserServiceTx txUserService = new UserServiceTx();
+        txUserService.setTransactionManager(transactionManager);
+        txUserService.setUserService(testUserService);
 
         userDao.deleteAll();
         for(User user : users) userDao.add(user);
@@ -137,10 +145,10 @@ public class UserServiceTest {
     }
 
 
-    static class TestUserService extends UserService {
+    static class TestUserServiceImpl extends UserServiceImpl {
         private String id;
 
-        private TestUserService(String id) {
+        private TestUserServiceImpl(String id) {
             this.id = id;
         }
 
