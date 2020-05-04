@@ -1,4 +1,4 @@
-package toby.factory;
+package toby.service;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -43,5 +43,9 @@ public class TxProxyFactoryBean implements FactoryBean<Object> {
 
     public void setPattern(String pattern) {
         this.pattern = pattern;
+    }
+
+    public void setServiceInterface(Class<?> serviceInterface) {
+        this.serviceInterface = serviceInterface;
     }
 }

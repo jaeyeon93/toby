@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Matchers.*;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
@@ -31,6 +32,9 @@ import static toby.service.UserServiceImpl.MIN_RECCOMEND_FOR_GOLD;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations= "/test-applicationContext.xml")
 public class UserServiceTest {
+
+    @Autowired
+    private ApplicationContext context;
 
     @Autowired
     UserServiceImpl userService;
@@ -118,40 +122,17 @@ public class UserServiceTest {
         assertThat(userWithoutLevelRead.getLevel(), is(Level.BASIC));
     }
 
-//    @Test
-//    public void upgradeAllOrNothing() {
-//        UserServiceImpl testUserService = new TestUserServiceImpl(users.get(3).getId());
-//        testUserService.setUserDao(this.userDao);
-//        testUserService.setMailSender(this.mailSender);
-//
-//        UserServiceTx txUserService = new UserServiceTx();
-//        txUserService.setTransactionManager(transactionManager);
-//        txUserService.setUserService(testUserService);
-//
-//        userDao.deleteAll();
-//        for(User user : users) userDao.add(user);
-//
-//        try {
-//            testUserService.upgradeLevels();
-//            fail("TestUserServiceException expected");
-//        }
-//        catch(TestUserServiceException e) {
-//        }
-//    }
-
     @Test
-    public void upgradeAllOrNothing() {
+    @DirtiesContext
+    public void upgradeAllOrNothing() throws Exception {
         UserServiceImpl testUserService = new TestUserServiceImpl(users.get(3).getId());
         testUserService.setUserDao(this.userDao);
         testUserService.setMailSender(this.mailSender);
 
-        TransactionHandler txHandler = new TransactionHandler();
-        txHandler.setTarget(testUserService);
-        txHandler.setTransactionManager(transactionManager);
-        txHandler.setPattern("upgradeLevels");
-        UserService txUserService = (UserService) Proxy.newProxyInstance(
-                getClass().getClassLoader(), new Class[] {UserService.class}, txHandler
-        );
+        // 팩토리 빈 자체를 가져와야되서 빈이름에 &를 넣어야한다.
+        TxProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", TxProxyFactoryBean.class);
+        txProxyFactoryBean.setTarget(testUserService);
+        UserService txUserService = (UserService) txProxyFactoryBean.getObject();
 
         userDao.deleteAll();
         for(User user : users) userDao.add(user);
@@ -205,7 +186,6 @@ public class UserServiceTest {
 
 
     }
-
 
     static class TestUserServiceImpl extends UserServiceImpl {
         private String id;
