@@ -30,4 +30,8 @@
           class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource" />
     </bean>
+
+    <bean id="message" class="toby.factory.MessageFactoryBean">
+        <property name="text" value="Factory Bean" />
+    </bean>
 </beans>

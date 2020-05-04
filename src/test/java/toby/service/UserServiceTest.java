@@ -3,6 +3,8 @@ package toby.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers.*;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
@@ -15,6 +17,7 @@ import toby.dao.UserDao;
 import toby.domain.Level;
 import toby.domain.User;
 
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -115,21 +118,46 @@ public class UserServiceTest {
         assertThat(userWithoutLevelRead.getLevel(), is(Level.BASIC));
     }
 
+//    @Test
+//    public void upgradeAllOrNothing() {
+//        UserServiceImpl testUserService = new TestUserServiceImpl(users.get(3).getId());
+//        testUserService.setUserDao(this.userDao);
+//        testUserService.setMailSender(this.mailSender);
+//
+//        UserServiceTx txUserService = new UserServiceTx();
+//        txUserService.setTransactionManager(transactionManager);
+//        txUserService.setUserService(testUserService);
+//
+//        userDao.deleteAll();
+//        for(User user : users) userDao.add(user);
+//
+//        try {
+//            testUserService.upgradeLevels();
+//            fail("TestUserServiceException expected");
+//        }
+//        catch(TestUserServiceException e) {
+//        }
+//    }
+
     @Test
     public void upgradeAllOrNothing() {
         UserServiceImpl testUserService = new TestUserServiceImpl(users.get(3).getId());
         testUserService.setUserDao(this.userDao);
         testUserService.setMailSender(this.mailSender);
 
-        UserServiceTx txUserService = new UserServiceTx();
-        txUserService.setTransactionManager(transactionManager);
-        txUserService.setUserService(testUserService);
+        TransactionHandler txHandler = new TransactionHandler();
+        txHandler.setTarget(testUserService);
+        txHandler.setTransactionManager(transactionManager);
+        txHandler.setPattern("upgradeLevels");
+        UserService txUserService = (UserService) Proxy.newProxyInstance(
+                getClass().getClassLoader(), new Class[] {UserService.class}, txHandler
+        );
 
         userDao.deleteAll();
         for(User user : users) userDao.add(user);
 
         try {
-            testUserService.upgradeLevels();
+            txUserService.upgradeLevels();
             fail("TestUserServiceException expected");
         }
         catch(TestUserServiceException e) {
