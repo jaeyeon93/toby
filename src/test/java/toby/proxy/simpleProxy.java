@@ -3,8 +3,14 @@ package toby.proxy;
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
+import org.springframework.aop.framework.ProxyFactoryBean;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.NameMatchMethodPointcut;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 
@@ -30,4 +36,37 @@ public class simpleProxy {
                 new UppercaseHandler(new HelloTarget())); // 부가기능과 위임코드를 담은 InvocationHandler
     }
 
+    @Test
+    public void proxyFactoryBean() {
+        ProxyFactoryBean pfBean = new ProxyFactoryBean();
+        pfBean.setTarget(new HelloTarget());
+        pfBean.addAdvice(new UppercaseAdvice());
+        Hello proxieHello = (Hello)pfBean.getObject();
+        assertThat(proxieHello.sayHello("Toby"), is("HELLO TOBY"));
+    }
+
+    static class UppercaseAdvice implements MethodInterceptor {
+        @Override
+        public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+            String ret = (String)methodInvocation.proceed();
+            return ret.toUpperCase();
+        }
+    }
+
+    @Test
+    public void pointCutAdvisor() {
+        ProxyFactoryBean pfBean = new ProxyFactoryBean();
+        pfBean.setTarget(new HelloTarget());
+
+        NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
+        pointcut.setMappedName("sayH*");
+
+        pfBean.addAdvisor(new DefaultPointcutAdvisor(pointcut, new UppercaseAdvice()));
+
+        Hello proxiedHello = (Hello)pfBean.getObject();
+
+        assertThat(proxiedHello.sayHello("point"), is("HELLO POINT"));
+        assertThat(proxiedHello.sayHi("point"), is("HI POINT"));
+        assertThat(proxiedHello.sayThankYou("point"), is("thank you point"));
+    }
 }
