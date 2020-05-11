@@ -37,9 +37,9 @@
     </bean>
 
     <bean id="sqlService" class="toby.service.XmlSqlService">
-<!--        <property name="sqlReader" ref="sqlService" />-->
-<!--        <property name="sqlRegistry" ref="sqlService" />-->
-        <property name="sqlmapFile" value="sqlmap.xml" />
+        <property name="sqlReader" ref="sqlService" />
+        <property name="sqlRegistry" ref="sqlService" />
+        <property name="sqlMapFile" value="sqlmap.xml" />
     </bean>
 
     <bean id="userService" class="toby.service.UserServiceImpl">
