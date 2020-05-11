@@ -18,7 +18,7 @@
         <property name="sqlService" ref="sqlService" />
     </bean>
 
-    <bean id="sqlService" class="toby.service.SimpleSqlService">
+    <bean id="sqlService" class="toby.sqlservice.SimpleSqlService">
         <property name="sqlMap">
             <map>
                 <entry key="userAdd" value="insert into users (id, name, password, email, level, login, recommend) values(?,?,?,?,?,?,?)" />

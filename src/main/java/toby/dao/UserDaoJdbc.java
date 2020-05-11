@@ -4,7 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import toby.domain.Level;
 import toby.domain.User;
-import toby.service.SqlService;
+import toby.sqlservice.SqlService;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;

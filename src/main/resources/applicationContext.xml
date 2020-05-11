@@ -36,11 +36,21 @@
         <property name="sqlService" ref="sqlService" />
     </bean>
 
-    <bean id="sqlService" class="toby.service.XmlSqlService">
-        <property name="sqlReader" ref="sqlService" />
-        <property name="sqlRegistry" ref="sqlService" />
-        <property name="sqlMapFile" value="sqlmap.xml" />
+    <!-- sql service -->
+    <bean id="sqlService" class="toby.sqlservice.OxmSqlService">
+        <property name="unmarshaller" ref="unmarshaller" />
+        <property name="sqlmap" value="classpath:/toby/dao/sqlmap.xml" />
     </bean>
+
+    <bean id="unmarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+        <property name="contextPath" value="springbook.user.sqlservice.jaxb" />
+    </bean>
+
+    <bean id="sqlReader" class="toby.sqlservice.JaxbXmlSqlReader">
+        <property name="sqlmapFile" value="sqlmap.xml" />
+    </bean>
+
+    <bean id="sqlRegistry" class="toby.sqlservice.HashMapSqlRegistry"></bean>
 
     <bean id="userService" class="toby.service.UserServiceImpl">
         <property name="userDao" ref="userDao" />
@@ -48,8 +58,6 @@
     </bean>
 
     <bean id="mailSender" class="toby.service.DummyMailSender" />
-
-
 
     <bean id="transactionAdvice" class="toby.aop.TransactionAdvice">
         <property name="transactionManager" ref="transactionManager" />

@@ -1,4 +1,4 @@
-package toby.service;
+package toby.sqlservice;
 
 import toby.exception.SqlNotFoundException;
 
