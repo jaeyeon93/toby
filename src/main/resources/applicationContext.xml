@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/cache"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-						http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+						http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						http://www.springframework.org/schema/aop
+						http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+						http://www.springframework.org/schema/context
+						http://www.springframework.org/schema/context/spring-context-3.0.xsd
+						http://www.springframework.org/schema/tx
+						http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+
+    <!--부가적인 빈 설정, 초기화 작업을 해주는 후처리기 등록    -->
+    <context:annotation-config />
+
+    <!--DB-->
     <bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
         <property name="driverClass" value="com.mysql.jdbc.Driver" />
         <property name="url" value="jdbc:mysql://localhost/toby?characterEncoding=UTF-8" />
@@ -10,22 +24,22 @@
         <property name="password" value="12345" />
     </bean>
 
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    <!-- AOP @Transactional이 붙은 타입과 메서드에 부가기능을 담은 프록시를 추가하도록 만드는 후처리기 등록-->
+    <tx:annotation-driven />
+
     <bean id="userDao" class="toby.dao.UserDaoJdbc">
         <property name="dataSource" ref="dataSource" />
         <property name="sqlService" ref="sqlService" />
     </bean>
 
-    <bean id="sqlService" class="toby.service.SimpleSqlService">
-        <property name="sqlMap">
-            <map>
-                <entry key="userAdd" value="insert into users (id, name, password, email, level, login, recommend) values(?,?,?,?,?,?,?)" />
-                <entry key="userGet" value="select * from users where id = ?" />
-                <entry key="userGetAll" value="select * from users order by id" />
-                <entry key="userDeleteAll" value="delete from users" />
-                <entry key="userGetCount" value="select count(*) from users" />
-                <entry key="userUpdate" value="update users set name = ?, password = ?, email = ?, level = ?, login = ?, recommend = ? where id = ?" />
-            </map>
-        </property>
+    <bean id="sqlService" class="toby.service.XmlSqlService">
+<!--        <property name="sqlReader" ref="sqlService" />-->
+<!--        <property name="sqlRegistry" ref="sqlService" />-->
+        <property name="sqlmapFile" value="sqlmap.xml" />
     </bean>
 
     <bean id="userService" class="toby.service.UserServiceImpl">
@@ -35,10 +49,7 @@
 
     <bean id="mailSender" class="toby.service.DummyMailSender" />
 
-    <bean id="transactionManager"
-          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-        <property name="dataSource" ref="dataSource" />
-    </bean>
+
 
     <bean id="transactionAdvice" class="toby.aop.TransactionAdvice">
         <property name="transactionManager" ref="transactionManager" />
@@ -55,5 +66,4 @@
 
     <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" />
 
-    <tx:annotation-driven />
 </beans>
