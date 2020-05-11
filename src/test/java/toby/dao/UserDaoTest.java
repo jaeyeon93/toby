@@ -19,10 +19,12 @@ import java.sql.SQLException;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations= "/test-applicationContext.xml")
+@ContextConfiguration(classes = domain.TestApplicationContext.class)
 public class UserDaoTest {
+
     @Autowired
     UserDao dao;
+
     @Autowired
     DataSource dataSource;
 

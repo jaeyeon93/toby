@@ -12,10 +12,6 @@
 						http://www.springframework.org/schema/context/spring-context-3.0.xsd
 						http://www.springframework.org/schema/tx
 						http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
-
-    <!--부가적인 빈 설정, 초기화 작업을 해주는 후처리기 등록    -->
-    <context:annotation-config />
-
     <!--DB-->
     <bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
         <property name="driverClass" value="com.mysql.jdbc.Driver" />

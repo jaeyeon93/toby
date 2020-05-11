@@ -2,9 +2,9 @@
 
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
-       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-						http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+						http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
 
     <bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
         <property name="driverClass" value="com.mysql.jdbc.Driver" />
@@ -13,53 +13,43 @@
         <property name="password" value="12345" />
     </bean>
 
-    <bean id="userDao" class="toby.dao.UserDaoJdbc">
-        <property name="dataSource" ref="dataSource" />
-        <property name="sqlService" ref="sqlService" />
-    </bean>
-
-    <bean id="sqlService" class="toby.sqlservice.SimpleSqlService">
-        <property name="sqlMap">
-            <map>
-                <entry key="userAdd" value="insert into users (id, name, password, email, level, login, recommend) values(?,?,?,?,?,?,?)" />
-                <entry key="userGet" value="select * from users where id = ?" />
-                <entry key="userGetAll" value="select * from users order by id" />
-                <entry key="userDeleteAll" value="delete from users" />
-                <entry key="userGetCount" value="select count(*) from users" />
-                <entry key="userUpdate" value="update users set name = ?, password = ?, email = ?, level = ?, login = ?, recommend = ? where id = ?" />
-            </map>
-        </property>
-    </bean>
-
-    <bean id="userService" class="toby.service.UserServiceImpl">
-        <property name="userDao" ref="userDao" />
-        <property name="mailSender" ref="mailSender" />
-    </bean>
-
-    <bean id="mailSender" class="toby.service.DummyMailSender" />
-
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource" />
     </bean>
 
-    <!--   set advisor = advice + pointcut     -->
-    <bean id="transactionAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
-        <property name="advice" ref="transactionAdvice"/>
-        <property name="pointcut" ref="transactionPointcut"/>
+    <!-- sql service -->
+    <bean id="sqlService" class="springbook.user.sqlservice.OxmSqlService">
+        <property name="unmarshaller" ref="unmarshaller" />
+        <property name="sqlRegistry" ref="sqlRegistry" />
     </bean>
 
-    <bean id="transactionAdvice" class="toby.aop.TransactionAdvice">
-        <property name="transactionManager" ref="transactionManager" />
+    <bean id="sqlRegistry" class="springbook.user.sqlservice.updatable.EmbeddedDbSqlRegistry">
+        <property name="dataSource" ref="embeddedDatabase" />
     </bean>
 
-    <bean id="transactionPointcut" class="toby.aop.NameMatchClassMethodPointcut">
-        <property name="mappedName" value="upgrade" />
-        <property name="mappedClassName" value="*ServiceImpl" />
+    <jdbc:embedded-database id="embeddedDatabase" type="HSQL">
+        <jdbc:script location="classpath:springbook/user/sqlservice/updatable/sqlRegistrySchema.sql"/>
+    </jdbc:embedded-database>
+
+    <bean id="unmarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+        <property name="contextPath" value="springbook.user.sqlservice.jaxb" />
     </bean>
 
-    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" />
-
-    <bean id="testUserService" class="toby.service.UserServiceTest$TestUserServiceImpl" parent="userService" />
-
+    <!-- aop -->
     <tx:annotation-driven />
+
+    <!--  application components -->
+    <bean id="userDao" class="springbook.user.dao.UserDaoJdbc">
+        <property name="dataSource" ref="dataSource" />
+        <property name="sqlService" ref="sqlService" />
+    </bean>
+
+    <bean id="userService" class="springbook.user.service.UserServiceImpl">
+        <property name="userDao" ref="userDao" />
+        <property name="mailSender" ref="mailSender" />
+    </bean>
+
+    <bean id="testUserService" class="springbook.user.service.UserServiceTest$TestUserService" parent="userService" />
+
+    <bean id="mailSender" class="springbook.user.service.DummyMailSender" />
 </beans>
